@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>충북 AI 디지털 연수 추천</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    background: #f0f4ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  header .badge {
+    display: inline-block;
+    background: #1a56db;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1.3;
+  }
+
+  header p {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #555;
+  }
+
+  /* 진행 표시 */
+  .progress-bar {
+    width: 100%;
+    max-width: 600px;
+    height: 6px;
+    background: #dce3f5;
+    border-radius: 10px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1a56db, #6366f1);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  /* 카드 */
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 24px rgba(26,86,219,0.10);
+    transition: all 0.3s ease;
+  }
+
+  .card .step-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a56db;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .card h2 {
+    font-size: 21px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .card .sub {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 28px;
+  }
+
+  /* OX 버튼 */
+  .btn-group {
+    display: flex;
+    gap: 16px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 18px;
+    border: 2px solid #dce3f5;
+    border-radius: 14px;
+    background: #f8faff;
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn span.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .btn.yes:hover, .btn.yes.active {
+    border-color: #1a56db;
+    background: #e8f0ff;
+    color: #1a56db;
+  }
+
+  .btn.no:hover, .btn.no.active {
+    border-color: #e11d48;
+    background: #fff0f3;
+    color: #e11d48;
+  }
+
+  .btn.tool:hover, .btn.tool.active {
+    border-color: #7c3aed;
+    background: #f3eeff;
+    color: #7c3aed;
+  }
+
+  /* 도구 선택 */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tool-btn {
+    padding: 18px 14px;
+    border: 2px solid #dce3f5;
+    border-radius: 14px;
+    background: #f8faff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tool-btn .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+
+  .tool-btn:hover {
+    border-color: #7c3aed;
+    background: #f3eeff;
+    color: #7c3aed;
+  }
+
+  /* 결과 */
+  .result-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 24px rgba(26,86,219,0.10);
+    text-align: center;
+  }
+
+  .result-icon { font-size: 60px; margin-bottom: 16px; }
+
+  .result-badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+
+  .result-badge.type1 { background: #e8f0ff; color: #1a56db; }
+  .result-badge.type2 { background: #f3eeff; color: #7c3aed; }
+  .result-badge.type3-basic { background: #ecfdf5; color: #059669; }
+  .result-badge.type3-deep { background: #fff7ed; color: #d97706; }
+  .result-badge.type3-reflect { background: #fdf4ff; color: #9333ea; }
+
+  .result-card h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 10px;
+  }
+
+  .result-card .desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .result-card .detail-box {
+    background: #f8faff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: left;
+    margin-bottom: 28px;
+  }
+
+  .result-card .detail-box h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a56db;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .result-card .detail-box ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .result-card .detail-box li {
+    font-size: 14px;
+    color: #444;
+    padding: 5px 0;
+    border-bottom: 1px solid #eef0f8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-card .detail-box li:last-child { border-bottom: none; }
+
+  .result-card .detail-box li::before {
+    content: '✓';
+    color: #1a56db;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .btn-apply {
+    display: inline-block;
+    background: linear-gradient(135deg, #1a56db, #6366f1);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px 40px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    margin-bottom: 14px;
+  }
+
+  .btn-apply:hover { opacity: 0.88; }
+
+  .btn-retry {
+    background: none;
+    border: 2px solid #dce3f5;
+    color: #777;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-retry:hover { border-color: #999; color: #444; }
+
+  /* 숨기기/보이기 */
+  .hidden { display: none; }
+
+  /* 애니메이션 */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeIn 0.35s ease forwards; }
+
+  footer {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #aaa;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">2025 충청북도교육청</div>
+  <h1>AI 디지털 연수<br>나에게 맞는 과정 찾기</h1>
+  <p>몇 가지 질문에 답하면 딱 맞는 연수를 추천해 드려요.</p>
+</header>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+</div>
+
+<!-- Q1 -->
+<div class="card fade-in" id="q1">
+  <div class="step-label">Question 1 / 4</div>
+  <h2>AI 도구를 사용해본 적이 있나요?</h2>
+  <p class="sub">ChatGPT, 클로드, 뤼튼 등 AI 챗봇이나 생성형 AI 도구 경험 여부</p>
+  <div class="btn-group">
+    <button class="btn yes" onclick="answer('q1', true)">
+      ⭕ <span class="label">네, 써봤어요</span>
+    </button>
+    <button class="btn no" onclick="answer('q1', false)">
+      ❌ <span class="label">처음이에요</span>
+    </button>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="card fade-in hidden" id="q2">
+  <div class="step-label">Question 2 / 4</div>
+  <h2>특정 AI 도구를 집중해서<br>제대로 익히고 싶나요?</h2>
+  <p class="sub">ChatGPT, 클로드 같은 도구 하나를 깊이 파고 싶은지 여부</p>
+  <div class="btn-group">
+    <button class="btn yes" onclick="answer('q2', true)">
+      ⭕ <span class="label">도구를 마스터하고 싶어요</span>
+    </button>
+    <button class="btn no" onclick="answer('q2', false)">
+      ❌ <span class="label">체계적으로 단계별로요</span>
+    </button>
+  </div>
+</div>
+
+<!-- Q3: 도구 선택 -->
+<div class="card fade-in hidden" id="q3">
+  <div class="step-label">Question 3 / 4</div>
+  <h2>어떤 도구를 마스터하고 싶나요?</h2>
+  <p class="sub">집중적으로 학습할 AI 도구를 선택해 주세요.</p>
+  <div class="tool-grid">
+    <button class="tool-btn" onclick="selectTool('ChatGPT')">
+      <span class="icon">🤖</span>ChatGPT
+    </button>
+    <button class="tool-btn" onclick="selectTool('Claude')">
+      <span class="icon">🧠</span>클로드(Claude)
+    </button>
+    <button class="tool-btn" onclick="selectTool('이미지 AI')">
+      <span class="icon">🎨</span>이미지 생성 AI
+    </button>
+    <button class="tool-btn" onclick="selectTool('기타')">
+      <span class="icon">✨</span>기타 / 미정
+    </button>
+  </div>
+</div>
+
+<!-- Q4: 단계형 수준 -->
+<div class="card fade-in hidden" id="q4">
+  <div class="step-label">Question 3 / 4</div>
+  <h2>AI로 수업 자료를 만들어본 적 있나요?</h2>
+  <p class="sub">AI를 활용해 PPT, 문서, 퀴즈 등 수업 자료를 제작해본 경험</p>
+  <div class="btn-group">
+    <button class="btn yes" onclick="answer('q4', true)">
+      ⭕ <span class="label">만들어봤어요</span>
+    </button>
+    <button class="btn no" onclick="answer('q4', false)">
+      ❌ <span class="label">아직 없어요</span>
+    </button>
+  </div>
+</div>
+
+<!-- Q5: 단계형 심화 여부 -->
+<div class="card fade-in hidden" id="q5">
+  <div class="step-label">Question 4 / 4</div>
+  <h2>AI를 수업에 직접 활용하거나<br>학생과 함께 써본 적 있나요?</h2>
+  <p class="sub">단순 자료 제작을 넘어 수업 설계·운영에 AI를 써본 경험</p>
+  <div class="btn-group">
+    <button class="btn yes" onclick="answer('q5', true)">
+      ⭕ <span class="label">네, 수업에 써봤어요</span>
+    </button>
+    <button class="btn no" onclick="answer('q5', false)">
+      ❌ <span class="label">아직 없어요</span>
+    </button>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div class="result-card fade-in hidden" id="result"></div>
+
+<footer>충청북도교육청 AI 디지털 연수 · 2025</footer>
+
+<script>
+  const state = { tool: null };
+
+  const results = {
+    easy: {
+      icon: '🌱',
+      badgeClass: 'type1',
+      badgeText: '추천 연수 ①',
+      title: '저수준 간단활용 연수',
+      desc: 'AI가 처음이어도 괜찮아요.\n부담 없이 따라오면서 AI 도구를 처음으로 경험해보는 과정입니다.',
+      details: [
+        'AI가 뭔지, 어떻게 쓰는지 기초 개념',
+        'ChatGPT·뤼튼으로 간단한 글쓰기·요약 실습',
+        '수업·업무에 바로 쓸 수 있는 프롬프트 10선',
+        '반나절 완성 집중 연수 (6시간)',
+      ],
+      applyLink: '#apply-easy',
+    },
+    master: {
+      icon: '🎯',
+      badgeClass: 'type2',
+      badgeText: '추천 연수 ②',
+      title: '도구 마스터 연수',
+      desc: '하나의 AI 도구를 제대로, 깊게 배웁니다.\n활용 팁부터 고급 기능까지 집중적으로 익히는 과정입니다.',
+      details: [
+        '선택 도구 핵심 기능 완전 정복',
+        '교육 현장 맞춤 프롬프트 설계',
+        '수업 자료·평가지 자동화 실습',
+        '나만의 GPT / 챗봇 제작 (심화 선택)',
+      ],
+      applyLink: '#apply-master',
+    },
+    basic: {
+      icon: '📗',
+      badgeClass: 'type3-basic',
+      badgeText: '추천 연수 ③ — 기초',
+      title: '단계형 연수 · 기초',
+      desc: 'AI 개념부터 수업 적용까지, 차근차근 쌓아가는 단계형 연수입니다.\n기초 과정부터 시작해 심화→성찰 단계로 이어집니다.',
+      details: [
+        '생성형 AI 원리와 교육적 활용 개요',
+        'AI 도구 실습 (ChatGPT, 뤼튼, 클로드)',
+        '수업 자료·평가 문항 제작 실습',
+        '심화 과정으로 연계 가능',
+      ],
+      applyLink: '#apply-basic',
+    },
+    deep: {
+      icon: '📘',
+      badgeClass: 'type3-deep',
+      badgeText: '추천 연수 ③ — 심화',
+      title: '단계형 연수 · 심화',
+      desc: 'AI 수업 자료 제작 경험이 있는 선생님을 위한 과정입니다.\n교육과정과 AI를 연결하는 수업 설계를 깊이 배웁니다.',
+      details: [
+        'AI 기반 수업 설계 및 교육과정 재구성',
+        '학생 활동 중심 AI 수업 운영 전략',
+        'AI 윤리·리터러시 지도 방법',
+        '성찰 과정으로 연계 가능',
+      ],
+      applyLink: '#apply-deep',
+    },
+    reflect: {
+      icon: '📙',
+      badgeClass: 'type3-reflect',
+      badgeText: '추천 연수 ③ — 성찰',
+      title: '단계형 연수 · 성찰',
+      desc: 'AI 수업 실천 경험이 충분한 선생님을 위한 과정입니다.\n수업 사례를 나누고, 더 나은 방향을 함께 고민합니다.',
+      details: [
+        'AI 수업 실천 사례 나눔 및 피드백',
+        '동료 교사와 공동 수업 설계',
+        'AI 교육 효과성 분석 및 개선',
+        '연수 지도자·퍼실리테이터 입문',
+      ],
+      applyLink: '#apply-reflect',
+    },
+  };
+
+  function setProgress(pct) {
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function showCard(id) {
+    document.querySelectorAll('.card, .result-card').forEach(el => {
+      el.classList.add('hidden');
+      el.classList.remove('fade-in');
+    });
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    void el.offsetWidth; // reflow
+    el.classList.add('fade-in');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function answer(q, val) {
+    if (q === 'q1') {
+      setProgress(25);
+      if (!val) {
+        showResult('easy');
+      } else {
+        showCard('q2');
+      }
+    } else if (q === 'q2') {
+      setProgress(50);
+      if (val) {
+        showCard('q3');
+      } else {
+        showCard('q4');
+      }
+    } else if (q === 'q4') {
+      setProgress(75);
+      if (!val) {
+        showResult('basic');
+      } else {
+        showCard('q5');
+      }
+    } else if (q === 'q5') {
+      setProgress(100);
+      if (!val) {
+        showResult('deep');
+      } else {
+        showResult('reflect');
+      }
+    }
+  }
+
+  function selectTool(tool) {
+    state.tool = tool;
+    setProgress(100);
+    const r = JSON.parse(JSON.stringify(results.master));
+    r.title = `도구 마스터 연수 — ${tool}`;
+    r.details[0] = `${tool} 핵심 기능 완전 정복`;
+    showResult('master', r);
+  }
+
+  function showResult(type, customData) {
+    setProgress(100);
+    const data = customData || results[type];
+    const el = document.getElementById('result');
+    el.innerHTML = `
+      <div class="result-icon">${data.icon}</div>
+      <div class="result-badge ${data.badgeClass}">${data.badgeText}</div>
+      <h2>${data.title}</h2>
+      <p class="desc">${data.desc.replace(/\n/g, '<br>')}</p>
+      <div class="detail-box">
+        <h3>📋 주요 내용</h3>
+        <ul>${data.details.map(d => `<li>${d}</li>`).join('')}</ul>
+      </div>
+      <a class="btn-apply" href="${data.applyLink}">📝 연수 신청하러 가기</a>
+      <button class="btn-retry" onclick="restart()">↩ 다시 선택하기</button>
+    `;
+    showCard('result');
+  }
+
+  function restart() {
+    setProgress(0);
+    state.tool = null;
+    showCard('q1');
+  }
+</script>
+</body>
+</html>
